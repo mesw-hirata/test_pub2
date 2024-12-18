@@ -1,0 +1,40 @@
+name: Reopen Issue and Move to Previous Column
+
+on:
+  project_card:
+    types: [moved]
+
+jobs:
+  reopen-and-move:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Reopen issue and move to previous column
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        if [[ "${{ github.event.project_card.column_id }}" == "Done" ]]; then
+          ISSUE_URL=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            https://api.github.com/projects/columns/${{ github.event.project_card.column_id }}/cards/${{ github.event.project_card.id }} \
+            | jq -r '.content_url')
+
+          if [[ $ISSUE_URL == *"/issues/"* ]]; then
+            ISSUE_NUMBER=$(echo $ISSUE_URL | awk -F '/' '{print $NF}')
+            REPO=$(echo $ISSUE_URL | awk -F '/' '{print $(NF-3)"/"$(NF-2)}')
+
+            # Reopen the issue
+            curl -s -X PATCH -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/$REPO/issues/$ISSUE_NUMBER \
+              -d '{"state":"open"}'
+
+            # Move the card to the previous column
+            curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/projects/columns/Approved/cards \
+              -d '{"card_id":${{ github.event.project_card.id }}}'
+          fi
+        fi
