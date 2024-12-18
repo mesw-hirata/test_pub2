@@ -17,8 +17,10 @@ jobs:
             const user = context.payload.sender.login;
             console.log('login user:', user);
             if (authorizedUsers.includes(user) && issue.labels.some(label => label.name === 'Approved')) {
+              console.log('authorized: true');
               return { authorized: true };
             }
+            console.log('authorized: false');
             return { authorized: false };
 
       - name: Revert status change
