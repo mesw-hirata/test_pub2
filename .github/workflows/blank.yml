@@ -16,6 +16,7 @@ jobs:
             const issue = context.payload.issue;
             const user = context.payload.sender.login;
             console.log('label.name:', issue.labels.name);
+            console.log('labels:', issue.labels);
             console.log('login user:', user);
             if (authorizedUsers.includes(user) && issue.labels.some(label => label.name === 'Approved')) {
               console.log('authorized: true');
