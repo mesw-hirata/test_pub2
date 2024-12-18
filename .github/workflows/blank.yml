@@ -15,7 +15,7 @@ jobs:
             const authorizedUsers = ['mesw-hirata2'];
             const issue = context.payload.issue;
             const user = context.payload.sender.login;
-            issue.labels.some(label => console.log('label.name:', label.name));
+            console.log('label.name:', issue.labels.name);
             console.log('login user:', user);
             if (authorizedUsers.includes(user) && issue.labels.some(label => label.name === 'Approved')) {
               console.log('authorized: true');
